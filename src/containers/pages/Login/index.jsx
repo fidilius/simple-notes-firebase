@@ -2,7 +2,7 @@ import "./login.scss"
 import Button from "../../../components/atom/Button"
 import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { asyncLogin } from "../../../config/redux/action"
+import { loginUserAPI } from "../../../config/redux/action"
 import { useNavigate } from "react-router-dom"
 
 const Login = () => {
@@ -17,9 +17,13 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const test = await dispatch(asyncLogin({ email, password }))
+    const dataUser = await dispatch(loginUserAPI({ email, password })).unwrap()
 
-    console.log("test: ", test)
+    if (dataUser) {
+      setEmail("")
+      setPassword("")
+      navigate("/")
+    }
   }
 
   return (

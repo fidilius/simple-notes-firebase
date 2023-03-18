@@ -3,53 +3,77 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth"
-import { auth } from "../../firebase"
+import { set, ref, onValue, child, push, update } from "firebase/database"
+import { auth, database } from "../../firebase"
+import { loading } from "../reducer"
 
-export const asyncRegister = createAsyncThunk(
+export const registerUserAPI = createAsyncThunk(
   "async/register",
-  async ({ email, password, setEmail, setPassword }, thunkAPI) => {
+  async ({ email, password }, thunkAPI) => {
     try {
-      createUserWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          // Signed in
-          const user = userCredential.user
-          console.log("success: ", user)
-        })
-        .catch((error) => {
-          const errorCode = error.code
-          const errorMessage = error.message
-          console.log(errorCode)
-          console.log(errorMessage)
-        })
+      thunkAPI.dispatch(loading())
 
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          setEmail("")
-          setPassword("")
-          resolve()
-        }, 3000)
-      })
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+
+      return userCredential.user
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       return thunkAPI.rejectWithValue("something went wrong")
     }
   }
 )
 
-export const asyncLogin = createAsyncThunk(
+export const loginUserAPI = createAsyncThunk(
   "async/login",
   async ({ email, password }, thunkAPI) => {
     try {
+      thunkAPI.dispatch(loading())
+
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       )
 
-      return { status: true, user: userCredential.user }
+      return userCredential.user
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       return thunkAPI.rejectWithValue("login failed")
     }
   }
 )
+
+export const addDataToAPI = (data) => {
+  const { title, content, date, userId } = data
+
+  const newNotes = {
+    date,
+    title,
+    content,
+  }
+
+  const newNotesKey = push(child(ref(database), "notes")).key
+
+  const updates = {}
+  updates["notes/" + newNotesKey] = newNotes
+
+  return update(ref(database), updates)
+
+  // push(ref(database, "notes/" + userId), {
+  //   date,
+  //   title,
+  //   content,
+  // })
+}
+
+export const readDataAPI = () => {
+  const notes = ref(database, "notes")
+  onValue(notes, (snapshot) => {
+    const data = snapshot.val()
+    console.log(data)
+  })
+}

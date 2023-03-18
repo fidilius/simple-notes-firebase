@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { asyncRegister, asyncLogin } from "../action"
-import { redirect } from "react-router-dom"
+import { registerUserAPI, loginUserAPI } from "../action"
 
 const initialState = {
   popup: false,
@@ -12,32 +11,38 @@ const initialState = {
 const indexSlice = createSlice({
   name: "index",
   initialState,
+  reducers: {
+    loading: (state) => {
+      state.isLoading = true
+    },
+  },
   extraReducers: (builder) => {
-    builder.addCase(asyncRegister.pending, (state) => {
-      state.isLoading = true
-    })
-    builder.addCase(asyncRegister.fulfilled, (state) => {
+    builder.addCase(registerUserAPI.fulfilled, (state) => {
       state.isLoading = false
-    })
-    builder.addCase(asyncRegister.rejected, (state) => {
-      state.isLoading = false
+      console.log("register success")
     })
 
-    builder.addCase(asyncLogin.pending, (state) => {
-      state.isLoading = true
-    })
-    builder.addCase(asyncLogin.fulfilled, (state, action) => {
-      console.log("login success")
-      const { email, emailVerified, uid } = action.payload.user
-
+    builder.addCase(registerUserAPI.rejected, (state, action) => {
       state.isLoading = false
-      state.user = { uid, email, emailVerified }
-    })
-    builder.addCase(asyncLogin.rejected, (state, action) => {
       console.log(action.payload)
+    })
+
+    builder.addCase(loginUserAPI.fulfilled, (state, action) => {
       state.isLoading = false
+      console.log("login success")
+
+      const { email, emailVerified, uid, refreshToken } = action.payload
+      state.user = { uid, email, emailVerified, refreshToken }
+      state.isLogin = true
+    })
+
+    builder.addCase(loginUserAPI.rejected, (state, action) => {
+      state.isLoading = false
+      console.log(action.payload)
     })
   },
 })
+
+export const { loading } = indexSlice.actions
 
 export default indexSlice.reducer

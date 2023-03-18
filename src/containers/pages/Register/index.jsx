@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import "./register.scss"
 import Button from "../../../components/atom/Button"
-import { asyncRegister } from "../../../config/redux/action"
+import { registerUserAPI } from "../../../config/redux/action"
 
 const Register = () => {
   const [email, setEmail] = useState("")
@@ -11,9 +11,16 @@ const Register = () => {
   const dispatch = useDispatch()
   const { isLoading } = useSelector((store) => store.index)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    dispatch(asyncRegister({ email, password, setEmail, setPassword }))
+    const dataUser = await dispatch(
+      registerUserAPI({ email, password })
+    ).unwrap()
+
+    if (dataUser) {
+      setEmail("")
+      setPassword("")
+    }
   }
 
   return (
