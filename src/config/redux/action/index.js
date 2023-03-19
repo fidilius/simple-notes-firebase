@@ -3,7 +3,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth"
-import { set, ref, onValue, child, push, update } from "firebase/database"
+import { set, ref, onValue, push } from "firebase/database"
 import { auth, database } from "../../firebase"
 import { loading } from "../reducer"
 
@@ -56,24 +56,25 @@ export const addDataToAPI = (data) => {
     content,
   }
 
-  const newNotesKey = push(child(ref(database), "notes")).key
+  // const newNotesKey = push(child(ref(database), "notes")).key
 
-  const updates = {}
-  updates["notes/" + newNotesKey] = newNotes
+  // const updates = {}
+  // updates["notes/" + newNotesKey] = newNotes
 
-  return update(ref(database), updates)
+  // return update(ref(database), updates)
 
-  // push(ref(database, "notes/" + userId), {
-  //   date,
-  //   title,
-  //   content,
-  // })
+  push(ref(database, "notes/" + userId), newNotes)
 }
 
-export const readDataAPI = () => {
-  const notes = ref(database, "notes")
-  onValue(notes, (snapshot) => {
-    const data = snapshot.val()
-    console.log(data)
-  })
-}
+export const getDataFromAPI = createAsyncThunk(
+  "async/getDataFromAPI",
+  async (userId) => {
+    return new Promise((resolve) => {
+      const notes = ref(database, "notes/" + userId)
+      onValue(notes, (snapshot) => {
+        const data = Object.values(snapshot.val())
+        resolve(data)
+      })
+    })
+  }
+)

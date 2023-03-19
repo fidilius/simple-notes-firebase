@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit"
-import { registerUserAPI, loginUserAPI } from "../action"
+import { registerUserAPI, loginUserAPI, getDataFromAPI } from "../action"
 
 const initialState = {
   popup: false,
   isLogin: false,
   isLoading: false,
   user: {},
+  notes: [],
 }
 
 const indexSlice = createSlice({
@@ -14,6 +15,9 @@ const indexSlice = createSlice({
   reducers: {
     loading: (state) => {
       state.isLoading = true
+    },
+    login: (state) => {
+      state.isLogin = true
     },
   },
   extraReducers: (builder) => {
@@ -40,9 +44,13 @@ const indexSlice = createSlice({
       state.isLoading = false
       console.log(action.payload)
     })
+
+    builder.addCase(getDataFromAPI.fulfilled, (state, action) => {
+      state.notes = action.payload
+    })
   },
 })
 
-export const { loading } = indexSlice.actions
+export const { loading, login, getData } = indexSlice.actions
 
 export default indexSlice.reducer

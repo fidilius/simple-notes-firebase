@@ -1,13 +1,18 @@
 import { Navigate } from "react-router-dom"
-import { useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
+import { login } from "../../../config/redux/reducer"
 
 const ProtectedPage = ({ children }) => {
-  const { isLogin } = useSelector((store) => store.index)
+  const dispatch = useDispatch()
 
-  if (!isLogin) {
-    return <Navigate to={"/login"} replace={true} />
+  const userData = localStorage.getItem("userData")
+
+  if (userData) {
+    dispatch(login())
+
+    return children
   }
 
-  return children
+  return <Navigate to={"/login"} replace={true} />
 }
 export default ProtectedPage

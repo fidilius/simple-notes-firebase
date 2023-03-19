@@ -20,6 +20,9 @@ const Login = () => {
     const dataUser = await dispatch(loginUserAPI({ email, password })).unwrap()
 
     if (dataUser) {
+      const { email, emailVerified, uid, refreshToken } = dataUser
+      const userData = { email, emailVerified, uid, refreshToken }
+      localStorage.setItem("userData", JSON.stringify(userData))
       setEmail("")
       setPassword("")
       navigate("/")
